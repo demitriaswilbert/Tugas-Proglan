@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void input(vector<string>& prompt, vector<string*>& pStr, vector<int*>& pInt)
+void getInput(vector<string>& prompt, vector<string*>& pStr, vector<int*>& pInt)
 {
     int promptCnt = 0;
     for(size_t i = 0; i < pStr.size(); i++)
@@ -55,7 +55,7 @@ int main()
                 };
                 vector<string*> pStr = {&nama, &id, &nrp, &dept};
                 vector<int*> pInt = {&dd, &mm, &yy, &tm};
-                input(prompt, pStr, pInt);
+                getInput(prompt, pStr, pInt);
                 // cout << "Input nama                     : "; fflush(stdin); getline(cin,  nama);
                 // cout << "Input id                       : "; fflush(stdin); getline(cin,  id);
                 // cout << "Input nrp                      : "; fflush(stdin); getline(cin,  nrp);
@@ -80,7 +80,7 @@ int main()
                 };
                 vector<string*> pStr = {&nama, &id, &npp, &dept};
                 vector<int*> pInt = {&dd, &mm, &yy, &pd};
-                input(prompt, pStr, pInt);
+                getInput(prompt, pStr, pInt);
                 dosen tmp = dosen(id, nama, dd, mm, yy, npp, dept, pd);
                 recDosen.push_back(tmp);
 				break;
@@ -97,7 +97,7 @@ int main()
                 };
                 vector<string*> pStr = {&nama, &id, &npp, &unit};
                 vector<int*> pInt = {&dd, &mm, &yy};
-                input(prompt, pStr, pInt);
+                getInput(prompt, pStr, pInt);
                 tendik tmp = tendik(id, nama, dd, mm, yy, npp, unit);
                 recTendik.push_back(tmp);
 				break;
