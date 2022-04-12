@@ -46,25 +46,26 @@ int main()
 			case 1:
             {
                 string nama, id, nrp, dept; 
-                int dd, mm, yy, tm;
+                int dd, mm, yy, tm, sksLulus, semester;
                 vector<string> prompt = {
                     "Input nama                     : ", "Input id                       : ",
                     "Input nrp                      : ", "Input Departement              : ",
-                    "Input Tanggal Lahir (angka)    : ", "Input Bulan Lahir (angka)      : ", 
-                    "Input Tahun Lahir (angka)      : ", "Input Tahun masuk (angka)      : ", 
+                    "Input Tanggal Lahir (int)      : ", "Input Bulan Lahir (int)        : ", 
+                    "Input Tahun Lahir (int)        : ", "Input Tahun masuk (int)        : ", 
+                    "Input SKS Lulus (int)          : ", "Input Semester ke (int)        : "
                 };
                 vector<string*> pStr = {&nama, &id, &nrp, &dept};
-                vector<int*> pInt = {&dd, &mm, &yy, &tm};
+                vector<int*> pInt = {&dd, &mm, &yy, &tm, &sksLulus, &semester};
                 getInput(prompt, pStr, pInt);
-                // cout << "Input nama                     : "; fflush(stdin); getline(cin,  nama);
-                // cout << "Input id                       : "; fflush(stdin); getline(cin,  id);
-                // cout << "Input nrp                      : "; fflush(stdin); getline(cin,  nrp);
-                // cout << "Input Departement              : "; fflush(stdin); getline(cin,  dept);
-                // cout << "Input Tanggal Lahir (angka)    : "; fflush(stdin); cin >> dd;
-                // cout << "Input Bulan Lahir (angka)      : "; fflush(stdin); cin >> mm;
-                // cout << "Input Tahun Lahir (angka)      : "; fflush(stdin); cin >> yy;
-                // cout << "Input Tahun masuk (angka)      : "; fflush(stdin); cin >> tm;
                 mahasiswa tmp = mahasiswa(id, nama, dd, mm, yy, nrp, dept, tm);
+                tmp.setSKSLulus(sksLulus); tmp.setSemester(semester < 1? 1 : semester);
+
+                for(int i = 1; i < semester; i++)
+                {
+                    float ipsTmp;
+                    std::cout << "IPS Semester ke " << i << " (int)      : "; fflush(stdin); cin >> ipsTmp;
+                    tmp.setIPS(i, ipsTmp);
+                }
                 recMhs.push_back(tmp);
 				break;
             }
@@ -105,6 +106,7 @@ int main()
 			case 4:
             {
                 int i = 1;
+                cout << "Terdapat " << recMhs.size() << " Mahasiswa di dalam sistem ini." << endl;
                 for(auto a : recMhs)
                 {
                     cout << "\n" << i++ << ".\n";
@@ -114,12 +116,24 @@ int main()
                     cout << "    ID             : " << a.getId() << endl;
                     cout << "    Tanggal Lahir  : " << a.getTglLahir() << "/" << a.getBulanLahir() << "/" << a.getTahunLahir() << endl;
                     cout << "    Tahun Masuk    : " << a.getThnMsk() << endl;
+                    cout << "    Semester Ke    : " << a.getSemester() << endl;
+                    cout << "    SKS Lulus      : " << a.getSKSLulus() << endl;
+                    cout << "    Tahun Masuk    : " << a.getThnMsk() << endl;
+                    cout << "    IPK            : " << a.getIPK() << endl;
+                    cout << "    IPS            : { " ;
+
+                    for(int j=1, comma=0; j < a.getSemester(); j++, comma=1)
+                        cout << ((comma)? ", " : "") << a.getIPS(j);
+                    cout << " }" << endl;
+
                 }
+                
 				break;
             }
 			case 5:
             {
                 int i = 1;
+                cout << "Terdapat " << recDosen.size() << " Dosen di dalam sistem ini." << endl;
                 for(auto a : recDosen)
                 {
                     cout << "\n" << i++ << ".\n";
@@ -135,6 +149,7 @@ int main()
 			case 6:
 			{
                 int i = 1;
+                cout << "Terdapat " << recTendik.size() << " Tendik di dalam sistem ini." << endl;
                 for(auto a : recTendik)
                 {
                     cout << "\n" << i++ << ".\n";

@@ -30,6 +30,7 @@ public:
     int getThnMsk();
 
 	void hitungIPK();
+    float getIPK();
 
 	void setIPS(int semester, float ips);
 	float getIPS(int semester);
