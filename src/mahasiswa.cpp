@@ -37,9 +37,9 @@ int mahasiswa::getSKSLulus()
 void mahasiswa::hitungIPK()
 {
     float sum = 0.0f;
-    for(int i = 1; i < this->semesterke; i++)
+    for(int i = 0; i < this->semesterke; i++)
     {
-        sum += (float)(this->ips[i-1]) / (this->semesterke-1);
+        sum += (float)(this->ips[i]) / (this->semesterke);
     }
     this->ipk = sum;
 }
