@@ -1,53 +1,44 @@
-#include <iostream>
-#include "include/person.hpp"
+#include <bits/stdc++.h>
+#include "include/person.h"
 
-
-person::person(std::string id, std::string nama, int dd, int mm, int yy)
-		: id(id), nama(nama), dd(dd), mm(mm), yy(yy)
-{
-}
-
-void person::setId(std::string id)
+void person::setId(const std::string& id)
 {
 	this->id = id;
 }
 
-std::string person::getId() 
+const std::string& person::getId() 
 {
 	return this->id;
 }
 
-void person::setNama(std::string nama)
+void person::setNama(const std::string& nama)
 {
 	this->nama = nama;
 }
 
-std::string person::getNama()
+const std::string& person::getNama()
 {
 	return this->nama;
 }
 
-void person::setTglLahir(int dd, int mm, int yy)
+void person::setTglLahir(const std::string& TglLahir)
 {
-	this->dd = dd;
-	this->mm = mm;
-	this->yy = yy;
+	this->tglLahir = TglLahir;
 }
 
-int person::getTglLahir()
+const std::string& person::getTglLahir()
 {
-	return this->dd;
+	return this->tglLahir;
 }
 
-int person::getBulanLahir()
-{
-	return this->mm;
+bool operator < (const person& a, const person& b) {
+    return ((person&)a).getId() < ((person&)b).getId();
 }
-
-int person::getTahunLahir()
-{
-	return this->yy;
+bool operator < (const person& a, const std::string& b) {
+    return ((person&)a).getId() < b;
 }
-
+bool operator < (const std::string& a, const person& b) {
+    return a < ((person&)b).getId();
+}
 
 
