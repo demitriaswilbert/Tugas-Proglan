@@ -7,6 +7,11 @@ void Dosen::setPendidikan(int pendidikan)
 	this->pendidikan = pendidikan;
 }
 
+Dosen::~Dosen() {
+	for(Kelas *const i : this->kelas)
+        { this->unenroll(*i); }
+}
+
 bool Dosen::enroll(Kelas& rKelas) 
 {
     if(this->kelas.find(&rKelas) == this->kelas.end()) {

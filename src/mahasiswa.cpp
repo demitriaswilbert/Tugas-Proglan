@@ -1,8 +1,7 @@
 #include <bits/stdc++.h>
-#include <vector>
 #include "include/kelas.h"
 #include "include/mahasiswa.h"
-
+#include <iomanip>
 
 Mahasiswa::Mahasiswa(const std::string& id, const std::string& nama, const std::string& tglLahir, 
 				const std::string& nrp, const std::string& departemen, int tahunmasuk)
@@ -13,6 +12,11 @@ Mahasiswa::Mahasiswa(const std::string& id, const std::string& nama, const std::
 	this->skslulus = 0;
 
 	this->ips = std::vector<float>(14,0);
+}
+
+Mahasiswa::~Mahasiswa() {
+	for(std::pair<Kelas *const, float>& i : this->kelas_nilai)
+        { this->unenroll(*i.first); }
 }
 
 void Mahasiswa::setSemester(int semesterke)
@@ -128,7 +132,7 @@ std::ostream& operator << (std::ostream& os, Mahasiswa& mhs) {
     std::map<Kelas *, float>::const_iterator it = ref.begin();
     for(; it != ref.end(); ++it) {
         if(it != ref.begin()) os << ", ";
-        os << it->first->getId() << ": " << it->second;
+        os << it->first->getId() << ": " << std::setprecision(3) << it->second;
     }
     if(it == ref.begin())
         os << "Belum Mempunyai Kelas";

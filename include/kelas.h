@@ -42,6 +42,8 @@ class Kelas {
     bool operator>(const std::string& other) { return this->id > other; }
     bool operator<(const std::string& other) { return this->id < other; }
 
+    ~Kelas();
+
 };
 
 bool operator < (const Kelas& a, const Kelas& b);

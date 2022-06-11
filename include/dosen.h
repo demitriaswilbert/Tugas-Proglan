@@ -21,11 +21,12 @@ public:
     const std::string& getDept() {return this->departemen;}
     const std::set<Kelas*>& getAllKelas() {return this->kelas;}
     
-    const int getPendidikan() {return this->pendidikan;}
+    int getPendidikan() {return this->pendidikan;}
 	void setPendidikan(int pendidikan);
 
     bool enroll(Kelas& rKelas);
     bool unenroll(Kelas& rKelas);
+    ~Dosen();
 };
 
 std::ostream& operator << (std::ostream& os, Dosen& dsn);

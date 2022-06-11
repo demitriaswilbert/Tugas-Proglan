@@ -44,7 +44,7 @@ public:
 	const std::vector<float>& getAllIPS();
     const std::map<Kelas*, float>& getAllKelas();
 
-    
+    ~Mahasiswa();
 };
 
 std::ostream& operator << (std::ostream& os, Mahasiswa& mhs);

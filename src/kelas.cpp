@@ -87,3 +87,10 @@ bool operator < (const Kelas& a, const std::string& b) {
 bool operator < (const std::string& a, const Kelas& b) {
     return a < ((Kelas&)b).getId();
 }
+
+Kelas::~Kelas() {
+	for(Mahasiswa *const i : this->recMhs)
+        { this->removeMhs(*i); }
+	for(Dosen *const i : this->recDosen)
+        { this->removeDosen(*i); }
+}
