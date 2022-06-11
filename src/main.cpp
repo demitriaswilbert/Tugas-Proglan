@@ -1,258 +1,276 @@
-#include <iostream>
-#include <vector>
 
-#include "include/person.hpp"
-#include "include/mahasiswa.hpp"
-#include "include/dosen.hpp"
-#include "include/tendik.hpp"
+#include <bits/stdc++.h>
+#include <regex>
 
-using namespace std;
+#include "include/dosen.h"
+#include "include/kelas.h"
+#include "include/mahasiswa.h"
+#include "include/person.h"
+#include "include/tendik.h"
 
-/**
- * @brief Fungsi untuk mengambil data
- * 
- * Fungsi ini dibuat untuk mengambil data-data yang berulang pada case 1 s/d 3
- * seperti nama, npp/nrp, id, tanggal lahir, departemen, dan lainnya, agar tidak terjadi 
- * kode berulang yang dapat mengurangi keterbacaan kode.
- * 
- * @param prompt referensi dari vektor yang mengandung string untuk memberi konteks input
- * 
- * seperti "Input nama : ", "Input id : ", dsb.
- * 
- * @param pStr referensi dari vektor yang mengandung pointer data input yang berupa string
- * 
- * seperti nama, id, nrp, departement, dsb.
- * 
- * @param pInt referensi dari vektor yang mengandung pointer data input integer
- * 
- * seperti tanggal, bulan, dan tahun lahir, tahun masuk, sks Lulus, semester, dsb.
- * 
- */
-void getInput(vector<string>& prompt, vector<string*>& pStr, vector<int*>& pInt)
-{
-    int promptCnt = 0;
-    for(size_t i = 0; i < pStr.size(); i++)
-        { cout << prompt[promptCnt++]; fflush(stdin); getline(cin, *(pStr[i])); }
-    for(size_t i = 0; i < pInt.size(); i++)
-        { cout << prompt[promptCnt++]; fflush(stdin); cin >> *(pInt[i]); }
+std::regex regexTglLahir =
+    std::regex("(0?[1-9]|[12][0-9]|3[0-1])-(0?[1-9]|1[0-2])-\\d{4}");
+
+void addMhsHandler (
+        std::set<Mahasiswa, std::less<>>& rMhs,
+        std::set<Kelas, std::less<>>& rKelas
+    ) {
+
+    // Form Isi Data
+    std::string id, name, nrp, tglLahir, dept;
+    int thnMsk;
+    fflush(stdin);
+    std::cout << "ID         : ";
+    std::getline(std::cin, id);
+    std::cout << "Name       : ";
+    std::getline(std::cin, name);
+    std::cout << "NRP        : ";
+    std::getline(std::cin, nrp);
+
+    do {
+        std::cout << "Tgl. Lahir (format: dd-mm-yyyy): ";
+        std::getline(std::cin, tglLahir);
+        if (std::regex_match(tglLahir, regexTglLahir)) break;
+        std::cout << "Format Tanggal Lahir Salah!" << std::endl;
+    } while (true);
+
+    std::cout << "Departemen : ";
+    std::getline(std::cin, dept);
+    std::cout << "Thn. Masuk : ";
+    std::cin >> thnMsk;
+
+    // Masukkan ke set
+    std::pair<std::set<Mahasiswa, std::less<void>>::iterator, bool> tmpMhs = 
+        rMhs.insert(Mahasiswa(id, name, tglLahir, nrp, dept, thnMsk));
+    
+    // Enroll ke kelas
+    Mahasiswa& mhs = (Mahasiswa&)*(tmp.first);
+    if (!tmp.second)
+        std::cout << "[ERROR] Mahasiswa dengan ID: " << mhs.getId() << " Telah berada pada sistem ini." << std::endl;
+    bool enroll = true;
+    while (enroll) {
+        std::cout << "1. Enroll ke kelas" << std::endl;
+        std::cout << "2. Kembali" << std::endl;
+        int choice;
+        std::cout << "Pilihan > ";
+        std::cin >> choice;
+        fflush(stdin);
+        switch (choice) {
+            case 1: {
+                // form kelas
+                std::string id;
+                std::cout << "ID Kelas   : ";
+                std::getline(std::cin, id);
+                std::set<Kelas>::iterator it = rKelas.find(id);
+                if (it == rKelas.end()) { // Kelas tidak ditemukan
+                    std::cout << "[ERROR] Kelas dengan ID: " << id << " tidak ditemukan" << std::endl;
+                    break;
+                } else if (mhs.enroll((Kelas&)*it) == true) { // Berhasil Enroll
+                    std::cout << "Mahasiswa dengan ID: " << mhs.getId() << " berhasil teregistrasi ke kelas " << id << std::endl;
+                    break;
+                } else { // Mahasiswa telah berada di kelas ini
+                    std::cout << "[ERROR] Mahasiswa dengan ID: " << mhs.getId() << " telah berada ke kelas " << id << std::endl;
+                    break;
+                }
+                std::cout << "[ERROR] Unhandled Error: " << std::endl;
+                break;
+            }
+
+            case 2:
+                enroll = false;
+                break;
+        }
+    }
 }
 
-int main()
-{
-	vector<mahasiswa> recMhs;
-	vector<dosen> recDosen;
-	vector<tendik> recTendik;
+void addDosenHandler(
+        std::set<Dosen, std::less<>>& rDosen,
+        std::set<Kelas, std::less<>>& rKelas
+    ) {
+    // Form isi data
+    std::string id, name, npp, tglLahir, dept;
+    int pend;
+    fflush(stdin);
+    std::cout << "ID         : ";
+    std::getline(std::cin, id);
+    std::cout << "Name       : ";
+    std::getline(std::cin, name);
+    std::cout << "NPP        : ";
+    std::getline(std::cin, npp);
 
-	int menu_terpilih;
-    bool loopContinue = 1;
-	while(loopContinue) {
-        // display menu
-		cout << "Selamat datang di Universitas X" << endl << endl;
-		cout << "Data statistik:" << endl;
-		cout << "  1. Jumlah Mahasiswa             : " << recMhs.size() << " mahasiswa" << endl;
-		cout << "  2. Jumlah Dosen                 : " << recDosen.size() << " mahasiswa" << endl;
-		cout << "  3. Jumlah Tenaga Kependidikan   : " << recTendik.size() << " mahasiswa" << endl;
-		cout << endl;
-		cout << "Menu: " << endl;
-		cout << "  1. Tambah Mahasiswa" << endl;
-		cout << "  2. Tambah Dosen" << endl;
-		cout << "  3. Tambah Tenaga Kependidikan" << endl;
-		cout << "  4. Tampilkan semua Mahasiswa" << endl;
-		cout << "  5. Tampilkan semua Dosen" << endl;
-		cout << "  6. Tampilkan semua Tenaga Kependidikan" << endl;
-        cout << "  7. Keluar" << endl;
-		cout << "-> Silahkan memilih salah satu: ";
+    do {
+        std::cout << "Tgl. Lahir (format: dd-mm-yyyy): ";
+        std::getline(std::cin, tglLahir);
+        if (std::regex_match(tglLahir, regexTglLahir)) break;
+        std::cout << "Format Tanggal Lahir Salah!" << std::endl;
+    } while (true);
 
-        // mengambil pilihan menu user
-		fflush(stdin); cin >> menu_terpilih;
-        
-        // switch case sesuai pada pilihan user
-		switch (menu_terpilih) {
-            
-			case 1: // input mahasiswa baru
-            {
-                // deklarasi variabel string dan int
-                string nama, id, nrp, dept; 
-                int dd, mm, yy, tm, sksLulus, semester;
+    std::cout << "Departemen : ";
+    std::getline(std::cin, dept);
+    std::cout << "Pendidikan : ";
+    std::cin >> pend;
 
-                // definisi vektor string untuk ditampilkan ke terminal
-                // untuk menjadi konteks input data mahasiswa
-                vector<string> prompt = {
-                    "Input nama                     : ", "Input id                       : ",
-                    "Input nrp                      : ", "Input Departement              : ",
-                    "Input Tanggal Lahir (int)      : ", "Input Bulan Lahir (int)        : ", 
-                    "Input Tahun Lahir (int)        : ", "Input Tahun masuk (int)        : ", 
-                    "Input SKS Lulus (int)          : ", "Input Semester ke (int)        : "
-                };
+    // Masukkan ke set
+    std::pair<std::set<Dosen, std::less<void>>::iterator, bool> tmp = 
+        rDosen.insert(Dosen(id, name, tglLahir, npp, dept, pend));
 
-                // menggabungkan pointer dari masing-masing variabel input kedalam sebuah vektor 
-                vector<string*> pStr = {&nama, &id, &nrp, &dept};
-                vector<int*> pInt = {&dd, &mm, &yy, &tm, &sksLulus, &semester};
-
-                // mengambil input
-                getInput(prompt, pStr, pInt);
-
-                // deklarasi objek mahasiswa baru
-                mahasiswa tmp = mahasiswa(id, nama, dd, mm, yy, nrp, dept, tm);
-
-                // set nilai semester dan sks lulus menggunakan fungsi setter dari kelas
-                tmp.setSKSLulus(sksLulus); tmp.setSemester(semester = semester < 1? 1 : semester > 14? 14 : semester);
-
-                // input nilai sks untuk masing-masing semester
-                for(int i = 0; i < semester; i++)
-                {
-                    float ipsTmp;
-                    std::cout << "IPS Semester ke " << i + 1 << " (int)      : "; fflush(stdin); cin >> ipsTmp;
-                    tmp.setIPS(i+1, ipsTmp);
+    // Enroll ke kelas
+    Dosen& dsn = (Dosen&)*(tmp.first);
+    if (!tmp.second)
+        std::cout << "[ERROR] Dosen dengan ID: " << dsn.getId() << 
+                    " Telah berada pada sistem ini." << std::endl;
+    bool enroll = true;
+    while (enroll) {
+        std::cout << "1. Enroll ke kelas" << std::endl;
+        std::cout << "2. Kembali" << std::endl;
+        int choice;
+        std::cout << "Pilihan > ";
+        std::cin >> choice;
+        fflush(stdin);
+        switch (choice) {
+            case 1: {
+                std::string id;
+                std::cout << "ID Kelas   : ";
+                std::getline(std::cin, id);
+                std::set<Kelas>::iterator it = rKelas.find(id);
+                if (it == rKelas.end()) {
+                    std::cout << "[ERROR] Kelas dengan ID: " << id << " tidak ditemukan" << std::endl;
+                    break;
+                } else if (dsn.enroll((Kelas&)*it) == true) {
+                    std::cout << "Dosen dengan ID: " << dsn.getId() << " berhasil teregistrasi ke kelas " << id << std::endl;
+                    break;
+                } else {
+                    std::cout << "[ERROR] Dosen dengan ID: " << dsn.getId() << " telah berada ke kelas " << id << std::endl;
+                    break;
                 }
-
-                // masukkan objek mahasiswa yang telah dibuat kedalam vektor mahasiswa
-                recMhs.push_back(tmp);
-				break;
-            }
-            
-			case 2: // input dosen baru
-            {
-                // deklarasi variabel string dan int
-                string nama, id, npp, dept; 
-                int dd, mm, yy, pd;
-
-                // definisi vektor string untuk ditampilkan ke terminal 
-                // untuk menjadi konteks input data dosen
-                vector<string> prompt = {
-                    "Input nama                     : ", "Input id                       : ",
-                    "Input npp                      : ", "Input Departement              : ",
-                    "Input Tanggal Lahir (angka)    : ", "Input Bulan Lahir (angka)      : ",
-                    "Input Tahun Lahir (angka)      : ", "Input Pendidikan (angka)       : ",
-                };
-
-                // menggabungkan pointer dari masing-masing variabel input kedalam sebuah vektor 
-                vector<string*> pStr = {&nama, &id, &npp, &dept};
-                vector<int*> pInt = {&dd, &mm, &yy, &pd};
-
-                // mengambil input
-                getInput(prompt, pStr, pInt);
-
-                // deklarasi objek dosen baru
-                dosen tmp = dosen(id, nama, dd, mm, yy, npp, dept, pd);
-                
-                // masukkan objek dosen yang telah dibuat kedalam vektor dosen
-                recDosen.push_back(tmp);
-				break;
-            }
-            
-			case 3: // input tendik baru
-            {
-                // deklarasi variabel string dan int
-                string nama, id, npp, unit; 
-                int dd, mm, yy;
-
-                // definisi vektor string untuk ditampilkan ke terminal 
-                // untuk menjadi konteks input data tendik
-                vector<string> prompt = {
-                    "Input nama                     : ", "Input id                       : ",
-                    "Input npp                      : ", "Input Unit                     : ",
-                    "Input Tanggal Lahir (angka)    : ", "Input Bulan Lahir (angka)      : ",
-                    "Input Tahun Lahir (angka)      : ",
-                };
-
-                // menggabungkan pointer dari masing-masing variabel input kedalam sebuah vektor 
-                vector<string*> pStr = {&nama, &id, &npp, &unit};
-                vector<int*> pInt = {&dd, &mm, &yy};
-
-                // mengambil input
-                getInput(prompt, pStr, pInt);
-
-                // deklarasi objek tendik baru
-                tendik tmp = tendik(id, nama, dd, mm, yy, npp, unit);
-
-                // masukkan objek tendik yang telah dibuat kedalam vektor tendik
-                recTendik.push_back(tmp);
-				break;
-            }
-			case 4: // tampilkan data mahasiswa
-            {
-                // definisi counter i menjadi 1
-                int i = 1;
-
-                // tampilkan jumlah mahasiswa di dalam sistem
-                cout << "Terdapat " << recMhs.size() << " Mahasiswa di dalam sistem ini." << endl;
-
-                // iterasikan variabel a dari setiap objek di recMhs
-                for(auto a : recMhs)
-                {
-                    // tampilkan data tiap mahasiswa
-                    cout << "\n" << i++ << ".\n";
-                    cout << "    Nama           : " << a.getNama() << endl;
-                    cout << "    NRP            : " << a.getNRP() << endl;
-                    cout << "    Departemen     : " << a.getDept() << endl;
-                    cout << "    ID             : " << a.getId() << endl;
-                    cout << "    Tanggal Lahir  : " << a.getTglLahir() << "/" << a.getBulanLahir() << "/" << a.getTahunLahir() << endl;
-                    cout << "    Tahun Masuk    : " << a.getThnMsk() << endl;
-                    cout << "    Semester Ke    : " << a.getSemester() << endl;
-                    cout << "    SKS Lulus      : " << a.getSKSLulus() << endl;
-                    cout << "    Tahun Masuk    : " << a.getThnMsk() << endl;
-                    cout << "    IPK            : " << a.getIPK() << endl;
-                    cout << "    IPS            : { " ;
-
-                    // for loop untuk menampilkan nilai sks dalam bentuk array C
-                    for(int j=0, comma=0; j < a.getSemester(); j++, comma=1)
-                        cout << ((comma)? ", " : "") << a.getIPS(j+1);
-                    cout << " }" << endl;
-
-                }
-                
-				break;
-            }
-			case 5: // tampilkan data dosen
-            {
-                // definisi counter i menjadi 1
-                int i = 1;
-
-                // tampilkan jumlah dosen di dalam sistem
-                cout << "Terdapat " << recDosen.size() << " Dosen di dalam sistem ini." << endl;
-
-                // iterasikan variabel a pada setiap objek di recDosen
-                for(auto a : recDosen)
-                {
-                    // tampilkan data dosen
-                    cout << "\n" << i++ << ".\n";
-                    cout << "    Nama           : " << a.getNama() << endl;
-                    cout << "    NPP            : " << a.getNPP() << endl;
-                    cout << "    Departemen     : " << a.getDept() << endl;
-                    cout << "    ID             : " << a.getId() << endl;
-                    cout << "    Tanggal Lahir  : " << a.getTglLahir() << "/" << a.getBulanLahir() << "/" << a.getTahunLahir() << endl;
-                    cout << "    Pendidikan     : " << a.getPendidikan() << endl;
-                }
-				break;
-            }
-			case 6: // tampilkan data tendik
-			{
-                // definisi counter i menjadi 1
-                int i = 1;
-                
-                // tampilkan jumlah dosen di dalam sistem
-                cout << "Terdapat " << recTendik.size() << " Tendik di dalam sistem ini." << endl;
-
-                // iterasikan variabel a pada setiap objek di recDosen
-                for(auto a : recTendik)
-                {
-                    // tampilkan data dosen
-                    cout << "\n" << i++ << ".\n";
-                    cout << "    Nama           : " << a.getNama() << endl;
-                    cout << "    NPP            : " << a.getNPP() << endl;
-                    cout << "    Unit           : " << a.getUnit() << endl;
-                    cout << "    ID             : " << a.getId() << endl;
-                    cout << "    Tanggal Lahir  : " << a.getTglLahir() << "/" << a.getBulanLahir() << "/" << a.getTahunLahir() << endl;
-                }
-				break;
-            }
-            case 7: // keluar dari program
-                cout << "Berhasil Keluar dari Program";
-                loopContinue = 0;
+                std::cout << "[ERROR] Unhandled Error: " << std::endl;
                 break;
-		}
-	}
+            }
 
-	return 0;
+            case 2:
+                enroll = false;
+                break;
+        }
+    }
+}
+
+void addKelasHandler(
+        std::set<Kelas, std::less<>>& rKelas,
+        std::set<Mahasiswa, std::less<>>& rMhs,
+        std::set<Dosen, std::less<>>& rDosen
+    ) {
+    // Form isi
+    std::string id, dept;
+    fflush(stdin);
+    std::cout << "ID         : ";
+    std::getline(std::cin, id);
+    std::cout << "Departemen : ";
+    std::getline(std::cin, dept);
+    Kelas kelas(id, dept);
+
+    // Masukkan ke set
+    std::pair<std::set<Kelas, std::less<>>::iterator, bool> tmp = rKelas.insert(Kelas(kelas));
+
+    // Enroll Mahasiswa dan dosen
+    Kelas& kls = (Kelas&)*(tmp.first);
+    if (!tmp.second)
+        std::cout << "[ERROR] Kelas dengan ID: " << kls.getId() << " Telah berada pada sistem ini." << std::endl;
+    bool enroll = true;
+    while (enroll) {
+        std::cout << "1. Enroll Mahasiswa" << std::endl;
+        std::cout << "2. Enroll Dosen" << std::endl;
+        std::cout << "3. Kembali" << std::endl;
+        int choice;
+        std::cout << "Pilihan > ";
+        std::cin >> choice;
+        fflush(stdin);
+        switch (choice) {
+            case 1: { // Enroll Mahasiswa
+                std::string id;
+                std::cout << "ID         : ";
+                std::getline(std::cin, id);
+                std::set<Mahasiswa>::iterator it = rMhs.find(id);
+                if (it == rMhs.end()) {
+                    std::cout << "[ERROR] Mahasiswa dengan ID: " << id << " tidak ditemukan" << std::endl;
+                    break;
+                } else if (kls.addMhs((Mahasiswa&)*it) == true) {
+                    std::cout << "Mahasiswa dengan ID : " << id << " berhasil teregistrasi di kelas " << kls.getId() << std::endl;
+                    break;
+                } else {
+                    std::cout << "[ERROR] Mahasiswa dengan ID : " << id << " telah berada di kelas " << kls.getId() << std::endl;
+                    break;
+                }
+                std::cout << "[ERROR] Unhandled Error: " << std::endl;
+                break;
+            }
+
+            case 2: { // Enroll Dosen
+                std::string id;
+                std::cout << "ID         : ";
+                std::getline(std::cin, id);
+                std::set<Dosen>::iterator it = rDosen.find(id);
+                if (it == rDosen.end()) {
+                    std::cout << "[ERROR] Dosen dengan ID: " << id << " tidak ditemukan" << std::endl;
+                    break;
+                } else if (kls.addDosen((Dosen&)*it) == true) {
+                    std::cout << "Dosen dengan ID : " << id << " berhasil teregistrasi di kelas " << kls.getId() << std::endl;
+                    break;
+                } else {
+                    std::cout << "[ERROR] Dosen dengan ID : " << id << " telah berada di kelas " << kls.getId() << std::endl;
+                    break;
+                }
+                std::cout << "[ERROR] Unhandled Error: " << std::endl;
+                break;
+            }
+            case 3:
+                enroll = false;
+                break;
+        }
+    }
+}
+
+int main() {
+    std::set<Kelas, std::less<>> recKelas;
+    std::set<Mahasiswa, std::less<>> recMhs;
+    std::set<Dosen, std::less<>> recDosen;
+
+    while (1) {
+        std::cout << "0. Keluar" << std::endl;
+        std::cout << "1. Add Mahasiswa" << std::endl;
+        std::cout << "2. Add Dosen" << std::endl;
+        std::cout << "3. Add Kelas" << std::endl;
+        std::cout << "4. Print Mahasiswa" << std::endl;
+        std::cout << "5. Print Dosen" << std::endl;
+        std::cout << "6. Print Kelas" << std::endl;
+        int choice;
+        std::cout << "Pilihan > ";
+        std::cin >> choice;
+
+        fflush(stdin);
+        switch (choice) {
+
+            case 1: { addMhsHandler(recMhs, recKelas); break; }
+            case 2: { addDosenHandler(recDosen, recKelas); break; }
+            case 3: { addKelasHandler(recKelas, recMhs, recDosen); }
+            case 4: {
+                for (const Mahasiswa& i : recMhs) {
+                    std::cout << (Mahasiswa&)i << std::endl;
+                }
+                break;
+            }
+            case 5: {
+                for (const Dosen& i : recDosen) {
+                    std::cout << (Dosen&)i << std::endl;
+                }
+                break;
+            }
+            case 6: {
+                for (const Kelas& i : recKelas) {
+                    std::cout << (Kelas&)i << std::endl;
+                }
+                break;
+            }
+            default: break;
+        }
+    }
 }
