@@ -26,7 +26,9 @@ class Form {
         std::cout << prompt;
         std::fflush(stdin);
         std::getline(std::cin, *buf); 
-        if (*buf == "Kembali") return 0;
+        if (*buf == "kembali") {
+            return 0;
+        }
         if (regex == NULL) return 2;
         return (((int)std::regex_match(*buf, std::regex(regex))) + 1);
     }
@@ -34,20 +36,49 @@ class Form {
 
 bool fillForm(std::vector<Form>& vForm) {
     for (Form& i : vForm) {
-        while (int result = i.eval()) {
-            if(result == 2) break;
+        while (true) {
+            int result = i.eval();
+            if(result == 2) 
+                break;
             if(result == 1) 
                 std::cout << "[ERROR] Format Salah!" << std::endl;
-            else return false;
+            if(result == 0) {
+                std::cout << "Terbatalkan" << std::endl;
+                return false;
+            }
         }
     }
     return true;
 }
 
+void Mhs_enrollKelas (
+    Mahasiswa& mhs, 
+    std::set<Kelas, std::less<>>& rKelas
+) {
+    std::string id;
+    std::vector<Form> vForm = {{"Kode Kelas : ", &id, ".{1,}"}};
+    if( !fillForm(vForm)) 
+        return;
+
+    std::set<Kelas>::iterator it = rKelas.find(id);
+    if (it == rKelas.end()) { // Kelas tidak ditemukan
+        std::cout   << "[ERROR] Kelas dengan ID: " << id 
+                    << " tidak ditemukan" << std::endl;
+    } else if (mhs.enroll((Kelas&)*it) == true) { // Berhasil Enroll
+        std::cout   << "Mahasiswa dengan ID: " << mhs.getId() 
+                    << " berhasil teregistrasi ke kelas " 
+                    << id << std::endl;
+    } else { // Mahasiswa telah berada di kelas ini
+        std::cout   << "[WARNING] Mahasiswa dengan ID: " 
+                    << mhs.getId() << " telah berada ke kelas " 
+                    << id << std::endl;
+    }
+}
+
 void addMhsHandler (
-        std::set<Mahasiswa, std::less<>>& rMhs,
-        std::set<Kelas, std::less<>>& rKelas
-    ) {
+    std::set<Mahasiswa, std::less<>>& rMhs,
+    std::set<Kelas, std::less<>>& rKelas
+) {
 
     // Form Isi Data
     std::string id, name, nrp, tglLahir, dept, thnMsk;
@@ -59,7 +90,8 @@ void addMhsHandler (
         {"Tgl. Lahir (format: dd-mm-yyyy): ", &tglLahir, regexTglLahir}, 
         {"Departemen : ", &dept, ".{1,}"}, {"Thn. Masuk : ", &thnMsk, "\\d{1,}"}
     };
-    if(!fillForm( form )) return;
+    if(!fillForm( form )) 
+        return;
 
     // Masukkan ke set
     std::pair<std::set<Mahasiswa, std::less<void>>::iterator, bool> tmp = 
@@ -74,41 +106,45 @@ void addMhsHandler (
     while (enroll) {
         std::cout << "1. Enroll ke kelas" << std::endl;
         std::cout << "2. Kembali" << std::endl;
-        int choice;
         std::cout << "Pilihan > ";
-        std::cin >> choice;
         fflush(stdin);
+        int choice; std::cin >> choice;
         switch (choice) {
-            case 1: {
-                // form kelas
-                std::string id;
-                std::cout << "ID Kelas   : ";
-                std::getline(std::cin, id);
-                std::set<Kelas>::iterator it = rKelas.find(id);
-                if (it == rKelas.end()) { // Kelas tidak ditemukan
-                    std::cout   << "[ERROR] Kelas dengan ID: " << id 
-                                << " tidak ditemukan" << std::endl;
-                } else if (mhs.enroll((Kelas&)*it) == true) { // Berhasil Enroll
-                    std::cout   << "Mahasiswa dengan ID: " << mhs.getId() 
-                                << " berhasil teregistrasi ke kelas " 
-                                << id << std::endl;
-                } else { // Mahasiswa telah berada di kelas ini
-                    std::cout   << "[WARNING] Mahasiswa dengan ID: " 
-                                << mhs.getId() << " telah berada ke kelas " 
-                                << id << std::endl;
-                }
-                break;
-            }
-
-            default: enroll = false;
+            case 1: { Mhs_enrollKelas(mhs, rKelas); break;}
+            case 2: enroll = false;
+            default: break;
         }
     }
 }
 
-void addDosenHandler(
-        std::set<Dosen, std::less<>>& rDosen,
-        std::set<Kelas, std::less<>>& rKelas
-    ) {
+void Dosen_enrollKelas(
+    Dosen& dsn,
+    std::set<Kelas, std::less<>>& rKelas
+) {
+    std::string id;
+    std::vector<Form> vForm = {{"Kode Kelas : ", &id, ".{1,}"}};
+    if( !fillForm(vForm)) 
+        return;
+
+    std::set<Kelas>::iterator it = rKelas.find(id);
+    if (it == rKelas.end()) {
+        std::cout   << "[ERROR] Kode kelas: " << id 
+                    << " tidak ditemukan" << std::endl;
+    } else if (dsn.enroll((Kelas&)*it) == true) {
+        std::cout   << "Dosen dengan email: " << dsn.getId() 
+                    << " berhasil teregistrasi ke kelas " << id 
+                    << std::endl;
+    } else {
+        std::cout   << "[WARNING] Dosen dengan email: " 
+                    << dsn.getId() << " telah berada ke kelas " 
+                    << id << std::endl;
+    }
+}
+
+void addDosenHandler (
+    std::set<Dosen, std::less<>>& rDosen,
+    std::set<Kelas, std::less<>>& rKelas
+) {
     // Form isi data
     std::string id, name, npp, tglLahir, dept, pend;
     
@@ -129,45 +165,76 @@ void addDosenHandler(
     if (!tmp.second)
         std::cout << "[WARNING] Dosen dengan ID: " << dsn.getId() << 
                     " Telah berada pada sistem ini." << std::endl;
+                    
     bool enroll = true;
     while (enroll) {
         std::cout << "1. Enroll ke kelas" << std::endl;
         std::cout << "2. Kembali" << std::endl;
-        int choice;
         std::cout << "Pilihan > ";
-        std::cin >> choice;
         fflush(stdin);
+        int choice; std::cin >> choice;
         switch (choice) {
-            case 1: {
-                std::string id;
-                std::cout << "ID Kelas   : ";
-                std::getline(std::cin, id);
-                std::set<Kelas>::iterator it = rKelas.find(id);
-                if (it == rKelas.end()) {
-                    std::cout   << "[ERROR] Kode kelas: " << id 
-                                << " tidak ditemukan" << std::endl;
-                } else if (dsn.enroll((Kelas&)*it) == true) {
-                    std::cout   << "Dosen dengan email: " << dsn.getId() 
-                                << " berhasil teregistrasi ke kelas " << id 
-                                << std::endl;
-                } else {
-                    std::cout   << "[WARNING] Dosen dengan email: " 
-                                << dsn.getId() << " telah berada ke kelas " 
-                                << id << std::endl;
-                }
-                break;
-            }
-
-            default: enroll = false;
+            case 1: {Dosen_enrollKelas(dsn, rKelas); break;}
+            case 2: enroll = false;
+            default: break;
         }
     }
 }
 
+void Kelas_addMhs(
+    Kelas& kls,
+    std::set<Mahasiswa, std::less<>>& rMhs
+) {
+    std::string id;
+    std::vector<Form> vForm = {{"Email ID   : ", &id, regexEmail}};
+    if( !fillForm(vForm)) 
+        return;
+
+    std::set<Mahasiswa>::iterator it = rMhs.find(id);
+    if (it == rMhs.end()) {
+        std::cout   << "[ERROR] Mahasiswa dengan email: " 
+                    << id << " tidak ditemukan" << std::endl;
+    } else if (kls.addMhs((Mahasiswa&)*it) == true) {
+        std::cout   << "Mahasiswa dengan email : " 
+                    << id << " berhasil teregistrasi di kelas " 
+                    << kls.getId() << std::endl;
+    } else {
+        std::cout   << "[WARNING] Mahasiswa dengan email : " 
+                    << id << " telah berada di kelas " 
+                    << kls.getId() << std::endl;
+    }
+}
+
+
+void Kelas_addDosen(
+    Kelas& kls,
+    std::set<Dosen, std::less<>>& rDosen
+) {
+    std::string id;
+    std::vector<Form> vForm = {{"Email ID   : ", &id, regexEmail}};
+    if( !fillForm(vForm)) 
+        return;
+
+    std::set<Dosen>::iterator it = rDosen.find(id);
+    if (it == rDosen.end()) {
+        std::cout   << "[ERROR] Dosen dengan email: " 
+                    << id << " tidak ditemukan" << std::endl;
+    } else if (kls.addDosen((Dosen&)*it) == true) {
+        std::cout   << "Dosen dengan email : " << id 
+                    << " berhasil teregistrasi di kelas " 
+                    << kls.getId() << std::endl;
+    } else {
+        std::cout   << "[ERROR] Dosen dengan email : " 
+                    << id << " telah berada di kelas " 
+                    << kls.getId() << std::endl;
+    }
+}
+
 void addKelasHandler(
-        std::set<Kelas, std::less<>>& rKelas,
-        std::set<Mahasiswa, std::less<>>& rMhs,
-        std::set<Dosen, std::less<>>& rDosen
-    ) {
+    std::set<Kelas, std::less<>>& rKelas,
+    std::set<Mahasiswa, std::less<>>& rMhs,
+    std::set<Dosen, std::less<>>& rDosen
+) {
     // Form isi
     std::string id, dept;
     
@@ -193,51 +260,12 @@ void addKelasHandler(
         std::cout << "1. Enroll Mahasiswa" << std::endl;
         std::cout << "2. Enroll Dosen" << std::endl;
         std::cout << "3. Kembali" << std::endl;
-        int choice;
         std::cout << "Pilihan > ";
-        std::cin >> choice;
         fflush(stdin);
+        int choice; std::cin >> choice;
         switch (choice) {
-            case 1: { // Enroll Mahasiswa
-                std::string id;
-                std::cout << "Email ID   : ";
-                std::getline(std::cin, id);
-                std::set<Mahasiswa>::iterator it = rMhs.find(id);
-                if (it == rMhs.end()) {
-                    std::cout   << "[ERROR] Mahasiswa dengan email: " 
-                                << id << " tidak ditemukan" << std::endl;
-                } else if (kls.addMhs((Mahasiswa&)*it) == true) {
-                    std::cout   << "Mahasiswa dengan email : " 
-                                << id << " berhasil teregistrasi di kelas " 
-                                << kls.getId() << std::endl;
-                } else {
-                    std::cout   << "[WARNING] Mahasiswa dengan email : " 
-                                << id << " telah berada di kelas " 
-                                << kls.getId() << std::endl;
-                }
-                break;
-            }
-
-            case 2: { // Enroll Dosen
-                std::string id;
-                std::cout << "ID         : ";
-                std::getline(std::cin, id);
-                std::set<Dosen>::iterator it = rDosen.find(id);
-                if (it == rDosen.end()) {
-                    std::cout   << "[ERROR] Dosen dengan email: " 
-                                << id << " tidak ditemukan" << std::endl;
-                } else if (kls.addDosen((Dosen&)*it) == true) {
-                    std::cout   << "Dosen dengan email : " << id 
-                                << " berhasil teregistrasi di kelas " 
-                                << kls.getId() << std::endl;
-                } else {
-                    std::cout   << "[ERROR] Dosen dengan email : " 
-                                << id << " telah berada di kelas " 
-                                << kls.getId() << std::endl;
-                }
-                break;
-            }
-
+            case 1: { Kelas_addMhs(kls, rMhs); break; }
+            case 2: { Kelas_addDosen(kls, rDosen); break; }
             default: enroll = false;
         }
     }
