@@ -41,8 +41,8 @@ public:
     bool unenroll(Kelas& rKelas);
 
 
-	const std::vector<float>& getAllIPS();
-    const std::map<Kelas*, float>& getAllKelas();
+	std::vector<float>& getAllIPS();
+    std::map<Kelas*, float>& getAllKelas();
 
     ~Mahasiswa();
 };
