@@ -10,18 +10,18 @@ class Dosen : public person {
 private:
 	std::string npp;
 	std::string departemen;
-	int pendidikan;
+	std::string pendidikan;
     std::set<Kelas*> kelas;
 
 public:
-	Dosen(const std::string& id, const std::string& nama, const std::string& tglLahir, const std::string& npp, const std::string& departemen, int pendidikan) :
+	Dosen(const std::string& id, const std::string& nama, const std::string& tglLahir, const std::string& npp, const std::string& departemen, const std::string& pendidikan) :
         person(id, nama, tglLahir), npp(npp), departemen(departemen), pendidikan(pendidikan) {};
 
     const std::string& getNPP() {return this->npp;}
     const std::string& getDept() {return this->departemen;}
-    const std::set<Kelas*>& getAllKelas() {return this->kelas;}
+    std::set<Kelas*>& getAllKelas() {return this->kelas;}
     
-    int getPendidikan() {return this->pendidikan;}
+    const std::string& getPendidikan() {return this->pendidikan;}
 	void setPendidikan(int pendidikan);
 
     bool enroll(Kelas& rKelas);

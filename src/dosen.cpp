@@ -35,7 +35,7 @@ bool Dosen::unenroll(Kelas& rKelas)
 std::ostream& operator << (std::ostream& os, Dosen& dsn) {
     os << "Dosen( " << (person&)dsn << ", NRP: " << dsn.getNPP() << ", Dept: " 
                         << dsn.getDept() << ", Pendidikan: " << dsn.getPendidikan() << ", Kelas Sekarang: {";
-    const std::set<Kelas *>& ref = dsn.getAllKelas();
+    std::set<Kelas *>& ref = dsn.getAllKelas();
     std::set<Kelas*>::iterator it = ref.begin();
     for(; it != ref.end(); ++it) {
         if(it != ref.begin()) 
