@@ -82,11 +82,11 @@ float Mahasiswa::getIPK()
 	return this->ipk;
 }
 
-const std::vector<float>& Mahasiswa::getAllIPS()
+std::vector<float>& Mahasiswa::getAllIPS()
 {
 	return this->ips;
 }
-const std::map<Kelas*, float>& Mahasiswa::getAllKelas()
+std::map<Kelas*, float>& Mahasiswa::getAllKelas()
 {
 	return this->kelas_nilai;
 }
