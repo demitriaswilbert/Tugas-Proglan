@@ -5,31 +5,32 @@
 
 class Mahasiswa;
 class Dosen;
+class Matkul;
 
 class Kelas {
     private:
     std::string id;
-    std::string dept;
-    std::set<Mahasiswa*> recMhs;
-    std::set<Dosen*> recDosen;
+    std::set<Mahasiswa*, std::less<>> recMhs;
+    std::set<Dosen*, std::less<>> recDosen;
+    Matkul* matkul = NULL;
     public:
-    Kelas(const std::string& id, const std::string& dept) : id(id), dept(dept) { }
+    Kelas(const std::string& id) : id(id), matkul(NULL) {}
 
     void setId(const std::string& aId) {id = aId;}
     const std::string& getId() {return id;}
 
-    void setDept(const std::string& aDept) {dept = aDept;}
-    const std::string& getDept() {return dept;}
-
-
     bool addMhs(Mahasiswa& rMhs);
     bool removeMhs(Mahasiswa& rMhs);
-    const std::set<Mahasiswa*>& getRecMhs() {return recMhs;}
+    std::set<Mahasiswa*, std::less<>>& getRecMhs() {return recMhs;}
 
+
+    bool setMatkul(Matkul& rMatkul);
+    Matkul* getMatkul() {return matkul;}
+    bool removeMatkul();
 
     bool addDosen(Dosen& rDosen);
     bool removeDosen(Dosen& rDosen);
-    const std::set<Dosen*>& getRecDosen() {return recDosen;}
+    std::set<Dosen*, std::less<>>& getRecDosen() {return recDosen;}
 
 
     Mahasiswa* getMhsById(const std::string& id);

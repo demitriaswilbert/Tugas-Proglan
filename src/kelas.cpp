@@ -1,6 +1,8 @@
 #include "include/kelas.h"
+#include "include/matkul.h"
 #include "include/mahasiswa.h"
 #include "include/dosen.h"
+
 
 Mahasiswa* Kelas::getMhsById(const std::string& id) {
         for(Mahasiswa* i : recMhs) {
@@ -16,6 +18,29 @@ Dosen* Kelas::getDosenById(const std::string& id) {
     }
     return NULL;
 }
+
+
+bool Kelas::setMatkul(Matkul& rMatkul) {
+    if (this->matkul != &rMatkul) {
+        if (this->matkul != NULL) {
+            this->matkul->removeKelas(*this);
+        }
+        this->matkul = &rMatkul;
+        rMatkul.addKelas(*this);
+        return true;
+    }
+    return false;
+}
+
+bool Kelas::removeMatkul() {
+    if (this->matkul != NULL) {
+        this->matkul->removeKelas(*this);
+        this->matkul = NULL;
+        return true;
+    }
+    return false;
+}
+
 
 bool Kelas::addMhs(Mahasiswa& rMhs) {
     if(this->recMhs.find(&rMhs) == this->recMhs.end()) {
@@ -53,8 +78,8 @@ bool Kelas::removeDosen(Dosen& rDosen) {
 }
 
 std::ostream& operator << (std::ostream& os, Kelas& kls) {
-    os << "Kelas( id: " << kls.getId() << ", Dept: " << kls.getDept() << ", Dosen: {" ;
-    const std::set<Dosen *>& refDosen = kls.getRecDosen();
+    os << "Kelas( id: " << kls.getId() << ", Dosen: {" ;
+    std::set<Dosen*, std::less<>>& refDosen = kls.getRecDosen();
     std::set<Dosen*>::iterator itDosen = refDosen.begin();
     for(; itDosen != refDosen.end(); ++itDosen) {
         if(itDosen != refDosen.begin()) 
@@ -64,7 +89,7 @@ std::ostream& operator << (std::ostream& os, Kelas& kls) {
     if(itDosen == refDosen.begin())
         os << "Belum ada dosen";
     os << "}, Mahasiswa: {";
-    const std::set<Mahasiswa *>& refMhs = kls.getRecMhs();
+    std::set<Mahasiswa*, std::less<>>& refMhs = kls.getRecMhs();
     std::set<Mahasiswa*>::iterator itMhs = refMhs.begin();
     for(; itMhs != refMhs.end(); ++itMhs) {
         if(itMhs != refMhs.begin()) 
@@ -93,4 +118,5 @@ Kelas::~Kelas() {
         { this->removeMhs(*i); }
 	for(Dosen *const i : this->recDosen)
         { this->removeDosen(*i); }
+    this->removeMatkul();
 }
