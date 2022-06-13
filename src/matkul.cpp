@@ -24,10 +24,7 @@ bool Matkul::removeKelas(Kelas& kelas) {
 bool operator < (const Matkul& a, const Matkul& b) {
     return ((Matkul&)a).getId() < ((Matkul&)b).getId();
 }
-std::ostream& operator << (std::ostream& os, Matkul& mkl) {
-    os  << "Matkul( ID: " << mkl.getId() << ", SKS: " << mkl.getSKS() 
-        << ", Kelas: {";
-}
+
 bool operator < (const Matkul& a, const std::string& b) {
     return ((Matkul&)a).getId() < b;
 }
@@ -39,4 +36,12 @@ Matkul::~Matkul() {
     for(Kelas* i : this->getRecKelas()) {
         i->removeMatkul();
     }
+}
+
+std::ostream& operator << (std::ostream& os, const Matkul& matkul)  {
+    os  << "Matkul( " << matkul.getId() << ", SKS: " << matkul.getSKS() << ", "
+        << "Kelas : {"
+        << printIdPtr(matkul.getRecKelas().begin(), matkul.getRecKelas().end())
+        << "})";
+    return os;
 }

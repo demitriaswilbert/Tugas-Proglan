@@ -4,14 +4,14 @@
 #include "include/dosen.h"
 
 
-Mahasiswa* Kelas::getMhsById(const std::string& id) {
-        for(Mahasiswa* i : recMhs) {
-            if (i->getId() == id)
-                return i;
-        }
-        return NULL;
+Mahasiswa* Kelas::getMhsById(const std::string& id) const {
+    for(Mahasiswa* i : recMhs) {
+        if (i->getId() == id)
+            return i;
     }
-Dosen* Kelas::getDosenById(const std::string& id) {
+    return NULL;
+}
+Dosen* Kelas::getDosenById(const std::string& id) const {
     for(Dosen* i : recDosen) {
         if (i->getId() == id)
             return i;
@@ -77,28 +77,11 @@ bool Kelas::removeDosen(Dosen& rDosen) {
     return false;
 }
 
-std::ostream& operator << (std::ostream& os, Kelas& kls) {
-    os << "Kelas( id: " << kls.getId() << ", Dosen: {" ;
-    std::set<Dosen*, std::less<>>& refDosen = kls.getRecDosen();
-    std::set<Dosen*>::iterator itDosen = refDosen.begin();
-    for(; itDosen != refDosen.end(); ++itDosen) {
-        if(itDosen != refDosen.begin()) 
-            os << ", ";
-        os << (*itDosen)->getId();
-    }
-    if(itDosen == refDosen.begin())
-        os << "Belum ada dosen";
-    os << "}, Mahasiswa: {";
-    std::set<Mahasiswa*, std::less<>>& refMhs = kls.getRecMhs();
-    std::set<Mahasiswa*>::iterator itMhs = refMhs.begin();
-    for(; itMhs != refMhs.end(); ++itMhs) {
-        if(itMhs != refMhs.begin()) 
-            os << ", ";
-        os << (*itMhs)->getId();
-    }
-    if(itMhs == refMhs.begin())
-        os << "Belum ada Mahasiswa";
-    os << "})";
+std::ostream& operator << (std::ostream& os, const Kelas& kls) {
+    os << "Kelas( id: " << kls.getId() << ", Dosen: {"
+       << printIdPtr(kls.getRecDosen().begin(), kls.getRecDosen().end()) 
+       << "}, Mahasiswa: {"
+       << printIdPtr(kls.getRecMhs().begin(), kls.getRecMhs().end()) << "})";
     return os;
 }
 

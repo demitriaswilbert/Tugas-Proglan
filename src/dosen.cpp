@@ -32,19 +32,10 @@ bool Dosen::unenroll(Kelas& rKelas)
     return false;
 }
 
-std::ostream& operator << (std::ostream& os, Dosen& dsn) {
+std::ostream& operator << (std::ostream& os, const Dosen& dsn) {
     os << "Dosen( " << (person&)dsn << ", NRP: " << dsn.getNPP() << ", Dept: " 
                         << dsn.getDept() << ", Pendidikan: " << dsn.getPendidikan() << ", Kelas Sekarang: {";
-    std::set<Kelas *>& ref = dsn.getAllKelas();
-    std::set<Kelas*>::iterator it = ref.begin();
-    for(; it != ref.end(); ++it) {
-        if(it != ref.begin()) 
-            os << ", ";
-        os << (*it)->getId();
-    }
-    if(it == ref.begin())
-        os << "Belum Mempunyai Kelas";
-    os << "})";
+    os << printIdPtr(dsn.getAllKelas().begin(), dsn.getAllKelas().end()) << "})";
     return os;
 }
 

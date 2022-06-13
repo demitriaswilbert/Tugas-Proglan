@@ -19,27 +19,25 @@ Mahasiswa::~Mahasiswa() {
         { this->unenroll(*i.first); }
 }
 
-void Mahasiswa::setSemester(int semesterke)
-{
+void Mahasiswa::setSemester(int semesterke) {
 	this->semesterke = semesterke;
 }
 
-int Mahasiswa::getSemester()
+int Mahasiswa::getSemester() const
 {
 	return this->semesterke;
 }
 
-void Mahasiswa::setSKSLulus(int skslulus)
-{
+void Mahasiswa::setSKSLulus(int skslulus) {
 	this->skslulus = skslulus;
 }
 
-int Mahasiswa::getSKSLulus()
+int Mahasiswa::getSKSLulus() const
 {
 	return this->skslulus;
 }
 
-void Mahasiswa::hitungIPK()
+void Mahasiswa::hitungIPK() 
 {
     float sum = 0.0f;
     for(int i = 0; i < this->semesterke; i++)
@@ -49,8 +47,7 @@ void Mahasiswa::hitungIPK()
     this->ipk = sum;
 }
 
-bool Mahasiswa::enroll(Kelas& rKelas)
-{
+bool Mahasiswa::enroll(Kelas& rKelas) {
     if(this->kelas_nilai.find(&rKelas) == this->kelas_nilai.end()) {
         this->kelas_nilai.insert({&rKelas, 0.0f});
         rKelas.addMhs(*this);
@@ -59,8 +56,7 @@ bool Mahasiswa::enroll(Kelas& rKelas)
     return false;
 }
 
-bool Mahasiswa::unenroll(Kelas& rKelas)
-{
+bool Mahasiswa::unenroll(Kelas& rKelas) {
     if(this->kelas_nilai.find(&rKelas) != this->kelas_nilai.end()) {
         this->kelas_nilai.erase(&rKelas);
         rKelas.removeMhs(*this);
@@ -69,7 +65,7 @@ bool Mahasiswa::unenroll(Kelas& rKelas)
     return false;
 }
 
-float Mahasiswa::getIPS(int semester)
+float Mahasiswa::getIPS(int semester) const
 {
 	if (semester < 15 && semester > 0)
 		return this->ips[semester-1];
@@ -77,31 +73,29 @@ float Mahasiswa::getIPS(int semester)
 	return -1.0;
 }
 
-float Mahasiswa::getIPK()
+float Mahasiswa::getIPK() const
 {
 	return this->ipk;
 }
 
-std::vector<float>& Mahasiswa::getAllIPS()
-{
-	return this->ips;
+std::vector<float>& Mahasiswa::getAllIPS() const{
+	return (std::vector<float>&) this->ips;
 }
-std::map<Kelas*, float>& Mahasiswa::getAllKelas()
-{
-	return this->kelas_nilai;
+std::map<Kelas*, float>& Mahasiswa::getAllKelas() const {
+	return (std::map<Kelas*, float>&) this->kelas_nilai;
 }
 
-const std::string& Mahasiswa::getNRP()
+const std::string& Mahasiswa::getNRP() const
 {
     return this->nrp;
 }
 
-const std::string& Mahasiswa::getDept()
+const std::string& Mahasiswa::getDept() const
 {
     return this->departemen;
 }
 
-int Mahasiswa::getThnMsk()
+int Mahasiswa::getThnMsk() const
 {
     return this->tahunmasuk;
 }
@@ -117,17 +111,13 @@ bool operator < (const std::string& a, const Mahasiswa& b) {
     return a < ((person&)b).getId();
 }
 
-std::ostream& operator << (std::ostream& os, Mahasiswa& mhs) {
-    os << "Mahasiswa( " << (person&)mhs << ", NRP: " << mhs.getNRP() << ", Dept: " 
-                        << mhs.getDept() << ", Thn. Masuk: " << mhs.getThnMsk() << ", Semester: " << mhs.getSemester() << ", SKS Lulus: " << mhs.getSKSLulus() << ", IPK: " << mhs.getIPK() << ", IPS: {";
-    int i = 0;
-    for(; i < mhs.getSemester(); i++) {
-        if(i > 0) os << ", ";
-        os << mhs.getAllIPS()[i];
-    }
-    if(i == 0)
-        os << "Belum Mempunyai Nilai";
-    os << "}, Kelas Sekarang: {";
+std::ostream& operator << (std::ostream& os, const Mahasiswa& mhs)  {
+    os << "Mahasiswa( " << (person&)mhs << ", NRP: " << mhs.getNRP() 
+       << ", Dept: " << mhs.getDept() << ", Thn. Masuk: " << mhs.getThnMsk() 
+       << ", Semester: " << mhs.getSemester() << ", SKS Lulus: " 
+       << mhs.getSKSLulus() << ", IPK: " << mhs.getIPK() << ", IPS: {"
+       << print(mhs.getAllIPS().begin(), mhs.getAllIPS().begin() + mhs.getSemester(), ", ")
+       << "}, Kelas Sekarang: {";
     const std::map<Kelas *, float>& ref = mhs.getAllKelas();
     std::map<Kelas *, float>::const_iterator it = ref.begin();
     for(; it != ref.end(); ++it) {
@@ -135,7 +125,7 @@ std::ostream& operator << (std::ostream& os, Mahasiswa& mhs) {
         os << it->first->getId() << ": " << std::setprecision(3) << it->second;
     }
     if(it == ref.begin())
-        os << "Belum Mempunyai Kelas";
+        os << "Kosong";
     os << "})";
     return os;
 }
