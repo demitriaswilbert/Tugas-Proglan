@@ -2,6 +2,7 @@
 #include <bits/stdc++.h>
 #include <regex>
 
+#include "include/global.h"
 #include "include/dosen.h"
 #include "include/kelas.h"
 #include "include/mahasiswa.h"
@@ -10,31 +11,18 @@
 #include "include/form.h"
 
 
-#define InfoBatal "[INFO] Ketik \'kembali\' untuk kembali ke laman sebelumnya" 
+#define InfoBatal       "[INFO] Ketik \'kembali\' untuk kembali ke laman sebelumnya" 
 
-#define regexTglLahir "(0?[1-9]|[12][0-9]|3[0-1])-(0?[1-9]|1[0-2])-\\d{4}"
-#define regexEmail "(\\w+)(\\.|_)?(\\w*)@(\\w+)(\\.(\\w+))+"
-#define regexFloat "^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$"
+#define regexTglLahir   "(0?[1-9]|[12][0-9]|3[0-1])-(0?[1-9]|1[0-2])-\\d{4}"
+#define regexEmail      "(\\w+)(\\.|_)?(\\w*)@(\\w+)(\\.(\\w+))+"
+#define regexFloat      "^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$"
 
 static std::set<Mahasiswa, std::less<>> rMhs;
 static std::set<Matkul, std::less<>> rMatkul;
 static std::set<Dosen, std::less<>> rDosen;
 static std::set<Kelas, std::less<>> rKelas;
 
-template <typename T> std::string print (T begin, T end) {
-    std::stringstream ss;
-    if (begin == end) {
-        ss << "{ Kosong }";
-        return ss.str();
-    } 
-    ss << "{ ";
-    for(T tmp = begin; tmp != end; ++tmp) {
-        if(tmp != begin) ss << ", ";
-        ss << (*tmp)->getId();
-    }
-    ss << " }";
-    return ss.str();
-}
+
 
 void Mhs_enrollKelas ( Mahasiswa& mhs );
 void Mhs_unenrollKelas ( Mahasiswa& mhs );
@@ -46,10 +34,10 @@ void Kelas_addDosen( Kelas& kls );
 void Kelas_removeDosen( Kelas& kls );
 void Matkul_addKelas( Matkul& matkul );
 void Matkul_removeKelas( Matkul& matkul );
-void addMhsHandler ( );
-void addDosenHandler ( );
-void addMatkulHandler ( );
-void addKelasHandler ( );
+void addMhsHandler ( void );
+void addDosenHandler ( void );
+void addMatkulHandler ( void );
+void addKelasHandler ( void );
 void dosen_beriNilai ( Dosen& dosen );
 void mhsPage ( Mahasiswa& mhs );
 void kelasPage ( Kelas& kelas );
@@ -60,12 +48,10 @@ int selectDosenHandler ( std::set<Dosen*, std::less<>>* pDosen = NULL );
 int selectMatkulHandler ( std::set<Matkul*, std::less<>>* pMatkul = NULL );
 int selectKelasHandler ( std::set<Kelas*, std::less<>>* pKelas = NULL );
 int selectKelasHandler ( std::map<Kelas*, float>* pKelas = NULL );
-void removeMhsHandler ( );
-void removeDosenHandler ( );
-void removeKelasHandler ( );
-void removeMatkulHandler ( );
-
-
+void removeMhsHandler ( void );
+void removeDosenHandler ( void );
+void removeKelasHandler ( void );
+void removeMatkulHandler ( void );
 
 void Mhs_enrollKelas ( Mahasiswa& mhs ) {
     std::string id;
@@ -231,7 +217,6 @@ void Kelas_removeDosen( Kelas& kls ) {
 void Matkul_addKelas(  Matkul& matkul ) {
     std::string id, dept;
     
-    std::system("cls");
     std::cout << "Form Isi Data Kelas" << std::endl;
     std::cout << InfoBatal << std::endl;
     if(!fillSingle( {"Kode Kelas : ", &id, ".{1,}"} )) return;
@@ -252,6 +237,7 @@ void Matkul_addKelas(  Matkul& matkul ) {
                         << " berhasil terdaftar di mata kuliah "
                         << matkul.getId() << std::endl;
         } 
+        std::getc(stdin);
     } else if (kls.getMatkul() != &matkul) {
         std::cout   << "[WARNING] Kelas dengan Kode: " 
                     << kls.getId() << " Telah terdaftar di mata kuliah " 
@@ -295,14 +281,13 @@ void addMhsHandler ( ) {
 
     // Form Isi Data
     std::string id, name, nrp, tglLahir, dept, thnMsk;
-    std::system("cls");
     std::cout << "Form Isi Data Mahasiswa" << std::endl;
     std::cout << InfoBatal << std::endl;
     std::vector<Form> form = { 
         {"Email ID   : ", &id, regexEmail}, {"Name       : ", &name, ".{1,}"}, 
         {"Tgl. Lahir (format: dd-mm-yyyy): ", &tglLahir, regexTglLahir}, 
         {"NRP        : ", &nrp, "\\d{1,}"}, {"Departemen : ", &dept, ".{1,}"}, 
-        {"Thn. Masuk : ", &thnMsk, "\\d{1,}"}
+        {"Thn. Masuk : ", &thnMsk, "\\d{1,9}"}
     };
     if(!fillForm( form )) 
         return;
@@ -311,6 +296,12 @@ void addMhsHandler ( ) {
     std::pair<std::set<Mahasiswa, std::less<void>>::iterator, bool> tmp = 
         rMhs.insert(Mahasiswa(id, name, tglLahir, nrp, dept, std::stoi(thnMsk)) );
     
+    if(!tmp.second) {
+        std::cout << "[WARNING] Mahasiswa dengan email : " << id
+                  << " Telah terdaftar sebelumnya di sistem ini." 
+                  << std::endl;
+        std::getc(stdin);
+    }
     // Enroll ke kelas
     Mahasiswa& mhs = (Mahasiswa&)*(tmp.first);
     mhsPage(mhs);
@@ -320,7 +311,6 @@ void addDosenHandler ( ) {
     // Form isi data
     std::string id, name, npp, tglLahir, dept, pend;
     
-    std::system("cls");
     std::cout << "Form Isi Data Dosen" << std::endl;
     std::cout << InfoBatal << std::endl;
     std::vector<Form> form = { 
@@ -334,13 +324,15 @@ void addDosenHandler ( ) {
     // Masukkan ke set
     std::pair<std::set<Dosen, std::less<void>>::iterator, bool> tmp = 
         rDosen.insert(Dosen(id, name, tglLahir, npp, dept, pend));
-
+    
+    if(!tmp.second) {
+        std::cout << "[WARNING] Dosen dengan email : " << id
+                  << " Telah terdaftar sebelumnya di sistem ini." 
+                  << std::endl;
+        std::getc(stdin);
+    }
     // Enroll ke kelas
     Dosen& dsn = (Dosen&)*(tmp.first);
-    if (!tmp.second)
-        std::cout << "[WARNING] Dosen dengan ID: " << dsn.getId() << 
-                    " Telah berada pada sistem ini." << std::endl;
-                    
     dosenPage(dsn);
 }
 
@@ -349,7 +341,6 @@ void addMatkulHandler ( )
     // Form isi
     std::string id, sks;
     
-    std::system("cls");
     std::cout << "Form Isi Data Mata Kuliah" << std::endl;
     std::cout << InfoBatal << std::endl;
     std::vector<Form> form = { 
@@ -361,31 +352,36 @@ void addMatkulHandler ( )
     // Masukkan ke set
     std::pair<std::set<Matkul, std::less<>>::iterator, bool> tmp = 
         rMatkul.insert(Matkul(id, std::stof(sks)));
+    
+    if(!tmp.second) {
+        std::cout << "[WARNING] Matkul dengan Kode : " << id
+                  << " Telah terdaftar sebelumnya di sistem ini." 
+                  << std::endl;
+        std::getc(stdin);
+    }
 
     // Tambah Kelas
     Matkul& matkul = (Matkul&)*(tmp.first);
-    if (!tmp.second)
-        std::cout   << "[WARNING] Mata Kuliah dengan Kode: " 
-                    << matkul.getId() << " Telah berada pada sistem ini." 
-                    << std::endl;
-
     matkulPage(matkul);
 }
 
 void mhsPage ( Mahasiswa& mhs ) {
     bool enroll = true;
     while (enroll) {
+        bool getInput = true;
+        std::system("cls");
+        std::cout << "Mahasiswa : " << mhs.getId() << std::endl;
         std::cout << "1. Enroll ke kelas" << std::endl;
         std::cout << "2. Pilih kelas" << std::endl;
         std::cout << "3. Hapus Kelas" << std::endl;
         std::cout << "4. Daftar Kelas" << std::endl;
         std::cout << "5. Kembali" << std::endl;
         std::string choiceStr;
-        if(!fillSingle({"Pilihan > ", &choiceStr, "\\d{1,}"})) return;
+        if(!fillSingle({"Pilihan > ", &choiceStr, "\\d{1,9}"})) return;
         int choice = std::stoi(choiceStr);
         switch (choice) {
             case 1: { Mhs_enrollKelas(mhs); break;}
-            case 2: { selectKelasHandler(&mhs.getAllKelas()); break; }
+            case 2: { selectKelasHandler(&mhs.getAllKelas()); getInput = false; break; }
             case 3: { Mhs_unenrollKelas(mhs); break;}
             case 4: { 
                 std::map<Kelas *, float>& kelas_nilai = mhs.getAllKelas();
@@ -400,9 +396,11 @@ void mhsPage ( Mahasiswa& mhs ) {
                                 << std::endl;
                 break;
             }
-            case 5: enroll = false;
+            case 5: getInput = false; enroll = false;
             default: break;
         }
+        if(getInput)
+            std::getc(stdin);
     }
 }
 
@@ -443,7 +441,9 @@ void dosen_beriNilai ( Dosen& dosen ) {
 void kelasPage ( Kelas& kelas ) {
     bool enroll = true;
     while (enroll) {
-        std::cout << std::endl;
+        bool getInput = true;
+        std::system("cls");
+        std::cout << "Kelas : " << kelas.getId() << std::endl;
         std::cout << "1. Tambah Mahasiswa" << std::endl;
         std::cout << "2. Tambah Dosen" << std::endl;
         std::cout << "3. Daftar Mahasiswa" << std::endl;
@@ -454,216 +454,260 @@ void kelasPage ( Kelas& kelas ) {
         std::cout << "8. Hapus Dosen" << std::endl;
         std::cout << "9. Kembali" << std::endl;
         std::string choiceStr;
-        if(!fillSingle({"Pilihan > ", &choiceStr, "\\d{1,}"})) return;
+        if(!fillSingle({"Pilihan > ", &choiceStr, "\\d{1,9}"})) return;
         int choice = std::stoi(choiceStr);
         switch (choice) {
             case 1: { Kelas_addMhs(kelas); break; }
             case 2: { Kelas_addDosen(kelas); break; }
             case 3: { 
-                std::cout << "\nDaftar Mahasiswa : " 
-                          << print(kelas.getRecMhs().begin(), kelas.getRecMhs().end())
-                          << std::endl;
+                std::cout << "\nDaftar Mahasiswa : {" 
+                          << printIdPtr(kelas.getRecMhs().begin(), kelas.getRecMhs().end())
+                          << "}"<< std::endl;
                 break; 
             }
             case 4: { 
-                std::cout << "\nDaftar Dosen : " 
-                          << print(kelas.getRecDosen().begin(), kelas.getRecDosen().end())
-                          << std::endl;
+                std::cout << "\nDaftar Dosen : {" 
+                          << printIdPtr(kelas.getRecDosen().begin(), kelas.getRecDosen().end())
+                          << "}"<< std::endl;
                 break;  
             }
-            case 5: { selectMhsHandler(&kelas.getRecMhs()); break;}
-            case 6: { selectDosenHandler(&kelas.getRecDosen()); break;}
+            case 5: { selectMhsHandler(&kelas.getRecMhs()); getInput = false; break;}
+            case 6: { selectDosenHandler(&kelas.getRecDosen()); getInput = false; break;}
             case 7: { Kelas_removeMhs(kelas); break;}
             case 8: { Kelas_removeDosen(kelas); break;}
-            case 9: enroll = false;
+            case 9: getInput = false; enroll = false;
             default: break;
         }
+        if(getInput)
+            std::getc(stdin);
     }
 }
 
 void matkulPage ( Matkul& matkul ) {
     bool enroll = true;
     while (enroll) {
+        bool getInput = true;
+        std::system("cls");
+        std::cout << "Mata Kuliah : " << matkul.getId() << std::endl;
         std::cout << "1. Tambah Kelas" << std::endl;
         std::cout << "2. Pilih Kelas" << std::endl;
         std::cout << "3. Hapus Kelas" << std::endl;
         std::cout << "4. Daftar Kelas" << std::endl;
         std::cout << "5. Kembali" << std::endl;
         std::string choiceStr;
-        if(!fillSingle({"Pilihan > ", &choiceStr, "\\d{1,}"})) return;
+        if(!fillSingle({"Pilihan > ", &choiceStr, "\\d{1,9}"})) return;
         int choice = std::stoi(choiceStr);
         switch (choice) {
-            case 1: { Matkul_addKelas(matkul); break; }
-            case 2: { selectKelasHandler(&matkul.getRecKelas()); break; }
+            case 1: { Matkul_addKelas(matkul); getInput = false; break; }
+            case 2: { selectKelasHandler(&matkul.getRecKelas()); getInput = false; break; }
             case 3: { Matkul_removeKelas(matkul); break; }
             case 4: { 
-                std::cout << "\nDaftar Kelas : " 
-                          << print(matkul.getRecKelas().begin(), matkul.getRecKelas().end())
-                          << std::endl;
+                std::cout << "\nDaftar Kelas : {" 
+                          << printIdPtr(matkul.getRecKelas().begin(), matkul.getRecKelas().end())
+                          << "}"<< std::endl;
+
                 break; 
             }
-            case 5: enroll = false;
+            case 5: getInput = false; enroll = false;
             default: break;
         }
+        if(getInput)
+            std::getc(stdin);
     }
 }
 
 void dosenPage ( Dosen& dosen ) {
     bool enroll = true;
     while (enroll) {
+        bool getInput = true; 
+        std::system("cls");
+        std::cout << "Dosen : " << dosen.getId() << std::endl;
         std::cout << "1. Tambah ke kelas" << std::endl;
         std::cout << "2. Daftar Kelas" << std::endl;
         std::cout << "3. Hapus Kelas" << std::endl;
         std::cout << "4. Beri Nilai" << std::endl;
         std::cout << "5. Kembali" << std::endl;
         std::string choiceStr;
-        if(!fillSingle({"Pilihan > ", &choiceStr, "\\d{1,}"})) return;
+        if(!fillSingle({"Pilihan > ", &choiceStr, "\\d{1,9}"})) return;
         int choice = std::stoi(choiceStr);
         switch (choice) {
             case 1: { Dosen_enrollKelas(dosen); break;}
             case 2: { 
-                std::cout   << "\nDaftar Kelas : "
-                            << print(dosen.getAllKelas().begin(), dosen.getAllKelas().end()) 
-                            << std::endl; 
+                std::cout   << "\nDaftar Kelas : {"
+                            << printIdPtr(dosen.getAllKelas().begin(), dosen.getAllKelas().end()) 
+                            << "}"<< std::endl;
+
                 break;
             }
             case 3: { Dosen_unenrollKelas(dosen); break; }
-            case 4: { dosen_beriNilai(dosen); break; }
-            case 5: enroll = false;
+            case 4: { dosen_beriNilai(dosen); getInput = false; break; }
+            case 5: getInput = false; enroll = false;
             default: break;
         }
+        if(getInput)
+            std::getc(stdin);
     }
 }
 
 int selectMhsHandler ( std::set<Mahasiswa*, std::less<>>* pMhs ) {
     // Form Isi Data
-    std::string id;
-    if (!fillSingle( {"Email ID   : ", &id, regexEmail} )) 
-        return 2;
+    while (1) {
+        std::system("cls");
+        std::string id;
+        std::cout << "Pilih Mahasiswa" << std::endl;
+        if (!fillSingle( {"Email ID   : ", &id, regexEmail} )) 
+            return 2;
 
-    std::set<Mahasiswa>::iterator it = rMhs.find(id);
-    if(it == rMhs.end()) {
-        std::cout   << "[ERROR] Mahasiswa dengan email: "
-                    << id << " tidak ditemukan." << std::endl;
-        return 0;
-    } else if (pMhs != NULL) {
-        std::set<Mahasiswa *>::iterator itMhs = pMhs->find((Mahasiswa*)&(*it));
-        if (itMhs == pMhs->end()) {
-            std::cout   << "[ERROR] Dosen dengan email " << id
-                        << " tidak ditemukan." << std::endl;
-            return 0;
-        }  
+        std::set<Mahasiswa>::iterator it = rMhs.find(id);
+        if(it == rMhs.end()) {
+            std::cout   << "[ERROR] Mahasiswa dengan email: "
+                        << id << " tidak ditemukan." << std::endl;
+            std::getc(stdin);
+            continue;
+        } else if (pMhs != NULL) {
+            std::set<Mahasiswa *>::iterator itMhs = pMhs->find((Mahasiswa*)&(*it));
+            if (itMhs == pMhs->end()) {
+                std::cout   << "[ERROR] Dosen dengan email " << id
+                            << " tidak ditemukan." << std::endl;
+                std::getc(stdin);
+                continue;
+            } 
+        }
+        Mahasiswa& mhs = (Mahasiswa&)(*it);
+        mhsPage(mhs);  
     }
     
-    Mahasiswa& mhs = (Mahasiswa&)(*it);
-    mhsPage(mhs);
     return 1;
 }
 
 int selectDosenHandler ( std::set<Dosen*, std::less<>>* pDosen ) {
     // Form isi data
-    std::string id;
-    if (!fillSingle( {"Email ID   : ", &id, regexEmail} )) 
-        return 2;
+    while(1)
+    { 
+        std::system("cls");
+        std::string id;
+        std::cout << "Pilih Dosen" << std::endl;
+        if (!fillSingle( {"Email ID   : ", &id, regexEmail} )) 
+            return 2;
 
-    std::set<Dosen>::iterator it = rDosen.find(id);
-    if(it == rDosen.end()) {
-        std::cout   << "[ERROR] Dosen dengan email: "
-                    << id << " tidak ditemukan." << std::endl;
-        return 0;
-    } else if (pDosen != NULL) {
-        std::set<Dosen *>::iterator itDosen = pDosen->find((Dosen*)&(*it));
-        if (itDosen == pDosen->end()) {
-            std::cout   << "[ERROR] Dosen dengan email " << id
-                        << " tidak ditemukan." << std::endl;
-            return 0;
-        }  
+        std::set<Dosen>::iterator it = rDosen.find(id);
+        if(it == rDosen.end()) {
+            std::cout   << "[ERROR] Dosen dengan email: "
+                        << id << " tidak ditemukan." << std::endl;
+            std::getc(stdin);
+            continue;
+        } else if (pDosen != NULL) {
+            std::set<Dosen *>::iterator itDosen = pDosen->find((Dosen*)&(*it));
+            if (itDosen == pDosen->end()) {
+                std::cout   << "[ERROR] Dosen dengan email " << id
+                            << " tidak ditemukan." << std::endl;
+                std::getc(stdin);
+                continue;
+            }  
+        }
+        Dosen& dosen = (Dosen&)(*it);
+        dosenPage(dosen);
     }
-    
-    Dosen& dosen = (Dosen&)(*it);
-    dosenPage(dosen);
     return 1;
 }
 
 int selectKelasHandler ( std::map<Kelas*, float>* pKelas ) {
     // Form isi data
-    std::string id;
-    if (!fillSingle( {"Kode Kelas : ", &id, ".{1,}"} )) 
-        return 2;
+    while(1) {
+        std::system("cls");
+        std::string id;
+        std::cout << "Pilih Kelas" << std::endl;
+        if (!fillSingle( {"Kode Kelas : ", &id, ".{1,}"} )) 
+            return 2;
 
-    std::set<Kelas>::iterator it = rKelas.find(id);
-    if(it == rKelas.end()) {
-        std::cout   << "[ERROR] Kode kelas: "
-                    << id << " tidak ditemukan." << std::endl;
-        return 0;
-    } else if (pKelas != NULL) {
-        std::map<Kelas *, float>::iterator itKelas = pKelas->find((Kelas*)&(*it));
-        if (itKelas == pKelas->end()) {
-            std::cout   << "[ERROR] Kode kelas: " << id
-                        << " tidak ditemukan." << std::endl;
-            return 0;
-        }  
+        std::set<Kelas>::iterator it = rKelas.find(id);
+        if(it == rKelas.end()) {
+            std::cout   << "[ERROR] Kode kelas: "
+                        << id << " tidak ditemukan." << std::endl;
+            std::getc(stdin);
+            continue;
+        } else if (pKelas != NULL) {
+            std::map<Kelas *, float>::iterator itKelas = pKelas->find((Kelas*)&(*it));
+            if (itKelas == pKelas->end()) {
+                std::cout   << "[ERROR] Kode kelas: " << id
+                            << " tidak ditemukan." << std::endl;
+                std::getc(stdin);
+                continue;
+            }  
+        }
+        
+        Kelas& kelas = (Kelas&)(*it);
+        kelasPage(kelas);
     }
-    
-    Kelas& kelas = (Kelas&)(*it);
-    kelasPage(kelas);
     return 1;
 }
 
 int selectKelasHandler ( std::set<Kelas*, std::less<>>* pKelas ) {
     // Form isi data
-    std::string id;
-    if (!fillSingle( {"Kode Kelas : ", &id, ".{1,}"} )) 
-        return 2;
+    while(1) {
+        std::system("cls");
+        std::string id;
+        std::cout << "Pilih Kelas" << std::endl;
+        if (!fillSingle( {"Kode Kelas : ", &id, ".{1,}"} )) 
+            return 2;
 
-    std::set<Kelas>::iterator it = rKelas.find(id);
-    if(it == rKelas.end()) {
-        std::cout   << "[ERROR] Kode kelas: "
-                    << id << " tidak ditemukan." << std::endl;
-        return 0;
-    } else if (pKelas != NULL) {
-        std::set<Kelas *>::iterator itKelas = pKelas->find((Kelas*)&(*it));
-        if (itKelas == pKelas->end()) {
-            std::cout   << "[ERROR] Kode kelas: " << id
-                        << " tidak ditemukan." << std::endl;
-            return 0;
-        }  
+        std::set<Kelas>::iterator it = rKelas.find(id);
+        if(it == rKelas.end()) {
+            std::cout   << "[ERROR] Kode kelas: "
+                        << id << " tidak ditemukan." << std::endl;
+            std::getc(stdin);
+            continue;
+        } else if (pKelas != NULL) {
+            std::set<Kelas *>::iterator itKelas = pKelas->find((Kelas*)&(*it));
+            if (itKelas == pKelas->end()) {
+                std::cout   << "[ERROR] Kode kelas: " << id
+                            << " tidak ditemukan." << std::endl;
+                std::getc(stdin);
+                continue;
+            }  
+        }
+        
+        Kelas& kelas = (Kelas&)(*it);
+        kelasPage(kelas);
     }
-    
-    Kelas& kelas = (Kelas&)(*it);
-    kelasPage(kelas);
     return 1;
 }
 
 int selectMatkulHandler ( std::set<Matkul*, std::less<>>* pMatkul ) {
     // Form isi data
-    std::string id;
-    if (!fillSingle( {"Kode Matkul: ", &id, ".{1,}"} )) 
-        return 2;
+    while(1) {
+        std::system("cls");
+        std::string id;
+        std::cout << "Pilih Mata Kuliah" << std::endl;
+        if (!fillSingle( {"Kode Matkul: ", &id, ".{1,}"} )) 
+            return 2;
 
-    std::set<Matkul>::iterator it = rMatkul.find(id);
-    if(it == rMatkul.end()) {
-        std::cout   << "[ERROR] Kode Matkul: "
-                    << id << " tidak ditemukan." << std::endl;
-        return 0;
-    } else if (pMatkul != NULL) {
-        std::set<Matkul *>::iterator itMatkul = pMatkul->find((Matkul*)&(*it));
-        if (itMatkul == pMatkul->end()) {
-            std::cout   << "[ERROR] Kode Matkul: " << id
-                        << " tidak ditemukan." << std::endl;
-            return 0;
-        }  
+        std::set<Matkul>::iterator it = rMatkul.find(id);
+        if(it == rMatkul.end()) {
+            std::cout   << "[ERROR] Kode Matkul: "
+                        << id << " tidak ditemukan." << std::endl;
+            std::getc(stdin);
+            continue;
+        } else if (pMatkul != NULL) {
+            std::set<Matkul *>::iterator itMatkul = pMatkul->find((Matkul*)&(*it));
+            if (itMatkul == pMatkul->end()) {
+                std::cout   << "[ERROR] Kode Matkul: " << id
+                            << " tidak ditemukan." << std::endl;
+                std::getc(stdin);
+                continue;
+            }  
+        }
+        
+        Matkul& matkul = (Matkul&)(*it);
+        matkulPage(matkul);
     }
-    
-    Matkul& matkul = (Matkul&)(*it);
-    matkulPage(matkul);
     return 1;
 }
 
 void addKelasHandler( ) {
     // Form isi
     std::string id, dept;
-    
+    std::cout << "Tambah Kelas" << std::endl;
     std::cout << InfoBatal << std::endl;
     if(!fillSingle( {"Kode Kelas : ", &id, ".{1,}"} )) return;
 
@@ -683,6 +727,8 @@ void addKelasHandler( ) {
 
 void removeMhsHandler( ) {
     std::string id;
+    std::cout << "Hapus Mahasiswa" << std::endl;
+    std::cout << InfoBatal;
     if (!fillSingle( {"Email ID   : ", &id, regexEmail} )) 
         return;
 
@@ -701,6 +747,8 @@ void removeMhsHandler( ) {
 
 void removeDosenHandler( ) {
     std::string id;
+    std::cout << "Hapus Dosen" << std::endl;
+    std::cout << InfoBatal << std::endl;
     if (!fillSingle( {"Email ID   : ", &id, regexEmail} )) 
         return;
     std::set<Dosen>::iterator it = rDosen.find(id);
@@ -718,6 +766,8 @@ void removeDosenHandler( ) {
 
 void removeKelasHandler( ) {
     std::string id;
+    std::cout << "Hapus Kelas" << std::endl;
+    std::cout << InfoBatal << std::endl;
     if (!fillSingle( {"Email ID   : ", &id, ".{1,}"} )) 
         return;
 
@@ -736,6 +786,8 @@ void removeKelasHandler( ) {
 
 void removeMatkulHandler( ) {
     std::string id;
+    std::cout << "Hapus Mata Kuliah" << std::endl;
+    std::cout << InfoBatal << std::endl;
     if (!fillSingle( {"ID        : ", &id, ".{1,}"} )) 
         return;
     std::set<Matkul>::iterator it = rMatkul.find(id);
@@ -763,6 +815,7 @@ int main() {
 
     bool run = true;
     while (run) {
+        bool getInput = true; 
         std::system("cls");
         std::cout << "Jumlah Mahasiswa  : " << rMhs.size() << std::endl;
         std::cout << "Jumlah Dosen      : " << rDosen.size() << std::endl;
@@ -774,47 +827,40 @@ int main() {
         std::cout << "0. Keluar" << std::endl;
         
         std::string choiceStr;
-        if(!fillSingle({"Pilihan > ", &choiceStr, "\\d{1,}"})) continue;
+        if(!fillSingle({"Pilihan > ", &choiceStr, "\\d{1,9}"})) continue;
         int choice = std::stoi(choiceStr);
+        std::system("cls");
 
-        fflush(stdin);
         switch (choice) {
 
-            case 1: { addMhsHandler(); break; }
-            case 2: { addDosenHandler(); break; }
-            case 3: { addMatkulHandler(); break;}
+            case 1: { addMhsHandler(); getInput = false; break; }
+            case 2: { addDosenHandler(); getInput = false; break; }
+            case 3: { addMatkulHandler(); getInput = false; break;}
 
-            case 4: { selectMhsHandler(); break;}
-            case 5: { selectDosenHandler(); break;}
-            case 6: { selectMatkulHandler(); break;}
+            case 4: { selectMhsHandler(); getInput = false; break;}
+            case 5: { selectDosenHandler(); getInput = false; break;}
+            case 6: { selectMatkulHandler(); getInput = false; break;}
 
             case 7: { removeMhsHandler(); break;}
             case 8: { removeDosenHandler(); break;}
             case 9: { removeMatkulHandler(); break;}
             
             case 10: {
-                for (const Mahasiswa& i : rMhs) {
-                    std::cout << (Mahasiswa&)i << std::endl;
-                }
+                std::cout << "\n" << print(rMhs.begin(), rMhs.end()) << std::endl;
                 break;
             }
             case 11: {
-                for (const Dosen& i : rDosen) {
-                    std::cout << (Dosen&)i << std::endl;
-                }
+                std::cout << "\n" << print(rDosen.begin(), rDosen.end()) << std::endl;
                 break;
             }
             case 12: {
-                for (const Kelas& i : rKelas) {
-                    std::cout << (Kelas&)i << std::endl;
-                }
+                std::cout << "\n" << print(rKelas.begin(), rKelas.end()) << std::endl;
                 break;
             }
             case 0: run = false;
             default: break;
         }
-        fflush(stdin);
-        std::cout << "[INFO] Tekan Enter untuk kembali ke menu: " << std::endl;
-        std::getc(stdin);
+        if(getInput)
+            std::getc(stdin);
     }
 }
