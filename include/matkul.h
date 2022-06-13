@@ -2,6 +2,7 @@
 #define MATKUL_HPP
 
 #include <bits/stdc++.h>
+#include "include/global.h"
 
 class Kelas;
 
@@ -16,15 +17,17 @@ class Matkul {
     Matkul(const std::string& id, float sks) : id(id), sks(sks) { }
 
     void setId(const std::string& aId) {id = aId;}
-    const std::string& getId() {return id;}
+    const std::string& getId() const {return id;}
 
     void setSKS(float sks) {this->sks = sks;}
-    float getSKS() {return this->sks;}
+    float getSKS() const {return this->sks;}
 
     bool addKelas(Kelas& rKelas);
     bool removeKelas(Kelas& rKelas);
 
-    std::set<Kelas*, std::less<>>& getRecKelas() {return recKelas;}
+    std::set<Kelas*, std::less<>>& getRecKelas() const {
+        return (std::set<Kelas*, std::less<>>&) recKelas;
+    }
 
     
     bool operator==(Matkul& other) { return this->id == other.getId(); }
@@ -38,7 +41,7 @@ class Matkul {
 };
 
 bool operator < (const Matkul& a, const Matkul& b);
-std::ostream& operator << (std::ostream& os, Matkul& mkl);
+std::ostream& operator << (std::ostream& os, const Matkul& mkl);
 bool operator < (const Matkul& a, const std::string& b);
 bool operator < (const std::string& a, const Matkul& b);
 

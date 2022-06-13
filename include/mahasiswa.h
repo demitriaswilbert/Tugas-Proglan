@@ -3,6 +3,7 @@
 
 
 #include <bits/stdc++.h>
+#include "include/global.h"
 #include "include/person.h"
 
 class Kelas;
@@ -23,31 +24,31 @@ public:
 					const std::string& nrp, const std::string& departemen, int tahunmasuk);
 
 	void setSemester(int semesterke);
-	int getSemester();
+	int getSemester() const;
 
 	void setSKSLulus(int skslulus);
-	int getSKSLulus();
+	int getSKSLulus() const;
 
-	const std::string& getNRP();
-	const std::string& getDept();
-    int getThnMsk();
+	const std::string& getNRP() const;
+	const std::string& getDept() const;
+    int getThnMsk() const;
 
 	void hitungIPK();
-    float getIPK();
+    float getIPK() const;
 
-	float getIPS(int semester);
+	float getIPS(int semester) const;
 
     bool enroll(Kelas& rKelas);
     bool unenroll(Kelas& rKelas);
 
 
-	std::vector<float>& getAllIPS();
-    std::map<Kelas*, float>& getAllKelas();
+	std::vector<float>& getAllIPS() const;
+    std::map<Kelas*, float>& getAllKelas() const;
 
     ~Mahasiswa();
 };
 
-std::ostream& operator << (std::ostream& os, Mahasiswa& mhs);
+std::ostream& operator << (std::ostream& os, const Mahasiswa& mhs);
 bool operator < (const Mahasiswa& a, const Mahasiswa& b);
 bool operator < (const Mahasiswa& a, const std::string& b);
 bool operator < (const std::string& a, const Mahasiswa& b);

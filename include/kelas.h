@@ -2,6 +2,7 @@
 #define KELAS_HPP
 
 #include <bits/stdc++.h>
+#include "include/global.h"
 
 class Mahasiswa;
 class Dosen;
@@ -17,24 +18,28 @@ class Kelas {
     Kelas(const std::string& id) : id(id), matkul(NULL) {}
 
     void setId(const std::string& aId) {id = aId;}
-    const std::string& getId() {return id;}
+    const std::string& getId() const {return id;}
 
     bool addMhs(Mahasiswa& rMhs);
     bool removeMhs(Mahasiswa& rMhs);
-    std::set<Mahasiswa*, std::less<>>& getRecMhs() {return recMhs;}
+    std::set<Mahasiswa*, std::less<>>& getRecMhs() const {
+        return (std::set<Mahasiswa*, std::less<>>&)recMhs;
+    }
 
 
     bool setMatkul(Matkul& rMatkul);
-    Matkul* getMatkul() {return matkul;}
+    Matkul* getMatkul() const {return matkul;}
     bool removeMatkul();
 
     bool addDosen(Dosen& rDosen);
     bool removeDosen(Dosen& rDosen);
-    std::set<Dosen*, std::less<>>& getRecDosen() {return recDosen;}
+    std::set<Dosen*, std::less<>>& getRecDosen() const {
+        return (std::set<Dosen*, std::less<>>&)recDosen;
+    }
 
 
-    Mahasiswa* getMhsById(const std::string& id);
-    Dosen* getDosenById(const std::string& id);
+    Mahasiswa* getMhsById(const std::string& id) const;
+    Dosen* getDosenById(const std::string& id) const;
 
     
     bool operator==(Kelas& other) { return this->id == other.getId(); }
@@ -48,7 +53,7 @@ class Kelas {
 };
 
 bool operator < (const Kelas& a, const Kelas& b);
-std::ostream& operator << (std::ostream& os, Kelas& kls);
+std::ostream& operator << (std::ostream& os, const Kelas& kls);
 bool operator < (const Kelas& a, const std::string& b);
 bool operator < (const std::string& a, const Kelas& b);
 

@@ -2,7 +2,7 @@
 #define __PERSON_HPP__
 
 #include <bits/stdc++.h>
-#include <regex>
+#include "include/global.h"
 
 class person {
 private:
@@ -16,21 +16,22 @@ public:
     }
 
 	void setId(const std::string& id);
-	const std::string& getId();
+	const std::string& getId() const { return id; }
 
 	void setNama(const std::string& nama);
-	const std::string& getNama();
+	const std::string& getNama() const { return nama; }
 
     void setTglLahir(const std::string& TglLahir);
-    const std::string& getTglLahir();
+    const std::string& getTglLahir() const { return tglLahir;}
 
     bool operator==(person& other) { return this->id == other.getId(); }
     bool operator>(person& other) { return this->id > other.getId(); }
     bool operator<(person& other) { return this->id < other.getId(); }
     bool operator>(const std::string& other) { return this->id > other; }
     bool operator<(const std::string& other) { return this->id < other; }
-    friend std::ostream& operator << (std::ostream& os, person& psn) {
-        os << "Person( ID: \"" << psn.getId() << "\", Nama: \"" << psn.getNama() << "\", Tgl. Lahir: " << psn.getTglLahir() << " )";
+    friend std::ostream& operator << (std::ostream& os, const person& psn) {
+        os  << "Person( ID: \"" << psn.getId() << "\", Nama: \"" 
+            << psn.getNama() << "\", Tgl. Lahir: " << psn.getTglLahir() << " )";
         return os;
     }
 };
